@@ -1,0 +1,32 @@
+---
+- hosts: kubernetes_worker_nodes
+  vars_files:
+    - env_variables
+  tasks:
+    - name: Copying token to worker nodes
+      copy: 
+        src: "{{ token_file }}" 
+        dest: join_token
+
+    - name: Joining worker nodes with kubernetes master
+      shell: |
+        kubeadm reset -f
+        cat join_token | tail -2 > out.sh
+        retry=0
+        max_retries=5
+        until [ $retry -ge $max_retries ]
+        do
+          sh out.sh && break
+          retry=$((retry+1))
+          echo "Retrying in 10 seconds... (attempt $retry/$max_retries)"
+          sleep 10
+        done
+      register: join_result
+      failed_when: join_result.rc != 0 and retry == max_retries
+      retries: 3
+      delay: 10
+
+    - name: Print the result of the join command
+      debug:
+        var: join_result
+      when: join_result.rc != 0

@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'NODE_TYPE', choices: ['Master', 'Worker'], description: 'Select the node type to setup')
+    }
+    environment {
+        ANSIBLE_HOST_KEY_CHECKING = 'False'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'k8s-2', credentialsId: 'Nagarro-Gitlab', url: 'https://git.nagarro.com/GITG00641/DotNet/deepak-kumar.git'
+            }
+        }
+        stage('Provision-K8S') {
+            steps {
+                script {
+                    sshagent (credentials: ['masterSshCredentials']) {
+                        if (params.NODE_TYPE == 'Master') {
+                            ansiblePlaybook(
+                                playbook: 'Ansible/settingup_kubernetes_cluster.yml',
+                                inventory: 'Ansible/hosts'
+                            )
+                        } else if (params.NODE_TYPE == 'Worker') {
+                            ansiblePlaybook(
+                                playbook: 'Ansible/join_kubernetes_workers_nodes.yml',
+                                inventory: 'Ansible/hosts'
+                            )
+                        } else {
+                            error("Invalid node type selected")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
