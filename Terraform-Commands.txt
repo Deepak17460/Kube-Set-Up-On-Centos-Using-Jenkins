@@ -1,0 +1,163 @@
+                                          **************Terraform****************
+
+
+
+1-> You can run the Terraform configuration file on any system where you have Terraform installed. Here's a step-by-step guide to get you started:
+
+1-> Install Terraform: If you haven't already, download and install Terraform from the [official Terraform website](https://www.terraform.io/downloads.html). Follow the instructions for your operating system.
+
+2-> Set Up Your Provider Credentials**:
+   - For AWS: Configure your AWS credentials using the AWS CLI or by setting environment variables (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
+   - For Azure: Log in to Azure using the Azure CLI with the command `az login` and set up the necessary service principal or use environment variables.
+
+3-> Write Your Terraform Configuration: Save the provided Terraform configuration into a file with a `.tf` extension, for example, `main.tf`.
+
+4-> Initialize Terraform:
+   - Open a terminal or command prompt.
+   - Navigate to the directory where your `.tf` file is located.
+   - Run the command `terraform init`. This will initialize the Terraform directory and download the necessary provider plugins.
+
+5-> Plan Your Deployment:
+   - Run the command `terraform plan`. This will show you what Terraform intends to do before actually making any changes to your infrastructure.
+
+6-> Apply Your Configuration:
+   - If you're satisfied with the plan, run the command `terraform apply`.
+   - Terraform will ask for confirmation before proceeding. Type `yes` to proceed.
+
+7-> Verify Your Deployment:
+   - Once Terraform has applied the configuration, it should output the details of the created resources.
+   - You can also verify the resources directly through the AWS Management Console or Azure Portal.
+
+Remember to always review your Terraform configurations and understand the changes that will be made before applying them. It's also good practice to use version control for your Terraform files to keep track of changes and collaborate with others. Happy provisioning! 
+
+
+                                   *************Information************
+
+Certainly! Below are two basic Terraform templates for provisioning an EC2 Instance on AWS and an Azure VM with minimal configurations. Please ensure you have the necessary permissions and have configured your provider credentials before running these templates.
+
+For **AWS EC2 Instance**:
+
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "ExampleInstance"
+  }
+}
+```
+
+This template sets up a basic AWS provider, specifies the region, and creates a `t2.micro` instance with a given AMI ID. Replace the `ami` value with the AMI ID suitable for your use case.
+
+For **Azure VM**:
+
+```hcl
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "East US"
+}
+
+resource "azurerm_virtual_network" "example" {
+  name                = "example-network"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+}
+
+resource "azurerm_subnet" "example" {
+  name                 = "example-subnet"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.example.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_network_interface" "example" {
+  name                = "example-nic"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.example.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "example" {
+  name                = "example-machine"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  size                = "Standard_F2"
+  admin_username      = "adminuser"
+  network_interface_ids = [
+    azurerm_network_interface.example.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
+}
+```
+
+This Azure template sets up a resource group, virtual network, subnet, network interface, and a Linux VM with a dynamic private IP. The VM is using the latest Ubuntu Server LTS image. Adjust the `size`, `admin_username`, and `source_image_reference` as needed for your requirements.
+
+Remember to initialize your Terraform configuration with `terraform init` and then apply it with `terraform apply`. Always review the plan before applying to understand the changes that will be made to your infrastructure.
+
+(1) Build a Windows Azure VM with Terraform: Step-by-Step - ATA Learning. https://adamtheautomator.com/terraform-azure-vm/.
+(2) Azure/virtual-machine/azurerm | Terraform Registry. https://registry.terraform.io/modules/Azure/virtual-machine/azurerm/latest.
+(3) Azure/terraform-azurerm-vm - GitHub. https://github.com/Azure/terraform-azurerm-vm.
+(4) azure-docs/articles/virtual-machines/linux/quick-create-terraform.md at .... https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/virtual-machines/linux/quick-create-terraform.md.
+(5) Create an App Service app using a Terraform template - Azure App .... https://learn.microsoft.com/en-us/azure/app-service/provision-resource-terraform.
+(6) Resource: aws_instance - Terraform Registry. https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance.
+(7) Terraform module to create AWS EC2 instance (s) resources. https://github.com/terraform-aws-modules/terraform-aws-ec2-instance.
+(8) Unlock Flexibility and Scalability: Deploying EC2 Instances with aws .... https://runebook.dev/en/docs/terraform/providers/aws/r/launch_template.
+(9) Terraform Registry. https://registry.terraform.io/modules/terraform-aws-modules/ec2-instance/aws/1.7.0/examples/basic.
+(10) Create an AWS Ec2 instance with Terraform.. https://awstip.com/create-an-aws-ec2-instance-with-terraform-fe981e26702d.
+(11) github.com. https://github.com/pulumi/pulumi-hugo/tree/a1948ebdf00d0a113b43996025def8596b883869/themes%2Fcurrent%2Fcontent%2Fmigrate%2Ftf2pulumi.md.
+(12) en.wikipedia.org. https://en.wikipedia.org/wiki/Terraform_(software).
+
+
+1-> Remember to initialize your Terraform configuration with terraform init and then apply it with terraform apply. Always review the plan before applying to understand the changes that will be made to your infrastructure.
+
+
+                                                                  ************************************************Terraform-Commands*****************************
+
+                                       **************Terraform-Important*****************
+
+
+a-> All commands for Terraform
+
+1-> terraform validate
+2-> terraform state
+3-> terraform destroy
+4-> terraform fmt
+5-> terraform init
+6-> terrafform plan
+7-> terrafom apply
+8-> terraform show
+9-> terraform destroy
+10->terraform --version
+
+b-> COnfiguration of Terraform
+
+1-> credentials_helper "example" {
+  args = []
+}
+--> here example which is known as label,local
