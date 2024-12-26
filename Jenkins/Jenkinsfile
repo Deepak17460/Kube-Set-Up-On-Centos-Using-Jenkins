@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'k8s-2', credentialsId: 'Nagarro-Gitlab', url: 'https://git.nagarro.com/GITG00641/DotNet/deepak-kumar.git'
+                git branch: 'k8s-2', credentialsId: '', url: ''
             }
         }
         stage('Provision-K8S') {
